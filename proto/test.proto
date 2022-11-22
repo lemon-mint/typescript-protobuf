@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/lemon-mint/typescript-protobuf/proto";
+
+package proto;
+
+enum TestEnum {
+    HTTP = 0;
+    HTTPS = 1;
+    FTP = 2;
+}
+
+message TestStruct {
+    TestEnum protocol = 1;
+    string host = 2;
+    uint32 port = 3;
+    bool is_secure = 4;
+
+    oneof TestOneof {
+        string password = 6;
+        uint64 token = 7;
+    }
+}

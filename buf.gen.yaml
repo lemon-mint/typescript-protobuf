@@ -1,0 +1,14 @@
+version: v1
+plugins:
+  - name: go
+    out: .
+    opt: paths=source_relative
+  - name: go-vtproto # for reference
+    out: .
+    opt:
+      - paths=source_relative
+  - name: lemontypes
+    out: .
+    path: ./cmd/protoc-gen-lemontypes/protoc-gen-lemontypes.exe
+    opt:
+      - paths=source_relative
