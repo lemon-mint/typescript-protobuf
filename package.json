@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/lemon-mint/typescript-protobuf/issues"
   },
-  "homepage": "https://github.com/lemon-mint/typescript-protobuf#readme"
+  "homepage": "https://github.com/lemon-mint/typescript-protobuf#readme",
+  "devDependencies": {
+    "typescript": "^4.9.3"
+  }
 }
