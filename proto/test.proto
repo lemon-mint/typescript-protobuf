@@ -6,15 +6,15 @@ package proto;
 
 enum TestEnum {
     HTTP = 0;
-    HTTPS = 1;
-    FTP = 2;
+    HTTPS = 2;
+    FTP = 5;
 }
 
 message TestStruct {
     TestEnum protocol = 1;
     string host = 2;
     uint32 port = 3;
-    bool is_secure = 4;
+    optional bool is_secure = 4;
 
     oneof TestOneof {
         string password = 6;

@@ -46,7 +46,7 @@ func (this *TestStruct) EqualVT(that *TestStruct) bool {
 	if this.Port != that.Port {
 		return false
 	}
-	if this.IsSecure != that.IsSecure {
+	if p, q := this.IsSecure, that.IsSecure; (p == nil && q != nil) || (p != nil && (q == nil || *p != *q)) {
 		return false
 	}
 	return string(this.unknownFields) == string(that.unknownFields)
@@ -94,9 +94,9 @@ func (m *TestStruct) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 			}
 		}
 	}
-	if m.IsSecure {
+	if m.IsSecure != nil {
 		i--
-		if m.IsSecure {
+		if *m.IsSecure {
 			dAtA[i] = 1
 		} else {
 			dAtA[i] = 0
@@ -177,7 +177,7 @@ func (m *TestStruct) SizeVT() (n int) {
 	if m.Port != 0 {
 		n += 1 + sov(uint64(m.Port))
 	}
-	if m.IsSecure {
+	if m.IsSecure != nil {
 		n += 2
 	}
 	if vtmsg, ok := m.TestOneof.(interface{ SizeVT() int }); ok {
@@ -333,7 +333,8 @@ func (m *TestStruct) UnmarshalVT(dAtA []byte) error {
 					break
 				}
 			}
-			m.IsSecure = bool(v != 0)
+			b := bool(v != 0)
+			m.IsSecure = &b
 		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Password", wireType)
