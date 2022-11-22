@@ -34,6 +34,10 @@ func compile(p *protogen.Plugin, file *protogen.File) {
 		compileEnum(f, e)
 	}
 
+	if len(file.Enums) > 0 && len(file.Messages) > 0 {
+		f.P()
+	}
+
 	for i, m := range file.Messages {
 		if i > 0 {
 			f.P()

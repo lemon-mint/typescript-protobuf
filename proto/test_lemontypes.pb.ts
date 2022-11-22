@@ -5,6 +5,7 @@ export enum TestEnum {
   HTTPS = 2,	// SIZE=1
   FTP = 5,	// SIZE=1
 }
+
 export interface TestStruct {
   protocol: TestEnum
   host: string
