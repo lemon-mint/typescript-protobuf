@@ -1,0 +1,19 @@
+{
+  "name": "typescript-protobuf",
+  "version": "1.0.0",
+  "description": "typescript protobuf",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lemon-mint/typescript-protobuf.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lemon-mint/typescript-protobuf/issues"
+  },
+  "homepage": "https://github.com/lemon-mint/typescript-protobuf#readme"
+}
