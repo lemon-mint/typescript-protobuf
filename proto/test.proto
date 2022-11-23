@@ -4,6 +4,9 @@ option go_package = "github.com/lemon-mint/typescript-protobuf/proto";
 
 package proto;
 
+import "google/protobuf/timestamp.proto";
+import "proto/testpb/testpb.proto";
+
 enum TestEnum {
     HTTP = 0;
     HTTPS = 2;
@@ -16,6 +19,9 @@ message TestStruct {
     uint32 port = 3;
     optional bool is_secure = 4;
 
+    google.protobuf.Timestamp created_at = 5;
+
+    testpb.HelloRequest hello = 60;
     oneof TestOneof {
         string password = 6;
         uint64 token = 7;

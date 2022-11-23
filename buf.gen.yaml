@@ -8,7 +8,7 @@ plugins:
     opt:
       - paths=source_relative
   - name: lemontypes
-    out: .
+    out: ./lemon
     path: ./cmd/protoc-gen-lemontypes/protoc-gen-lemontypes.exe
     opt:
       - paths=source_relative

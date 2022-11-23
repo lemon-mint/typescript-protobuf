@@ -6,7 +6,10 @@ package proto
 
 import (
 	fmt "fmt"
+	testpb "github.com/lemon-mint/typescript-protobuf/proto/testpb"
+	proto "google.golang.org/protobuf/proto"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	bits "math/bits"
 )
@@ -47,6 +50,24 @@ func (this *TestStruct) EqualVT(that *TestStruct) bool {
 		return false
 	}
 	if p, q := this.IsSecure, that.IsSecure; (p == nil && q != nil) || (p != nil && (q == nil || *p != *q)) {
+		return false
+	}
+	if equal, ok := interface{}(this.CreatedAt).(interface {
+		EqualVT(*timestamppb.Timestamp) bool
+	}); ok {
+		if !equal.EqualVT(that.CreatedAt) {
+			return false
+		}
+	} else if !proto.Equal(this.CreatedAt, that.CreatedAt) {
+		return false
+	}
+	if equal, ok := interface{}(this.Hello).(interface {
+		EqualVT(*testpb.HelloRequest) bool
+	}); ok {
+		if !equal.EqualVT(that.Hello) {
+			return false
+		}
+	} else if !proto.Equal(this.Hello, that.Hello) {
 		return false
 	}
 	return string(this.unknownFields) == string(that.unknownFields)
@@ -93,6 +114,52 @@ func (m *TestStruct) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 				return 0, err
 			}
 		}
+	}
+	if m.Hello != nil {
+		if marshalto, ok := interface{}(m.Hello).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.Hello)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0xe2
+	}
+	if m.CreatedAt != nil {
+		if marshalto, ok := interface{}(m.CreatedAt).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.CreatedAt)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x2a
 	}
 	if m.IsSecure != nil {
 		i--
@@ -180,8 +247,28 @@ func (m *TestStruct) SizeVT() (n int) {
 	if m.IsSecure != nil {
 		n += 2
 	}
+	if m.CreatedAt != nil {
+		if size, ok := interface{}(m.CreatedAt).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.CreatedAt)
+		}
+		n += 1 + l + sov(uint64(l))
+	}
 	if vtmsg, ok := m.TestOneof.(interface{ SizeVT() int }); ok {
 		n += vtmsg.SizeVT()
+	}
+	if m.Hello != nil {
+		if size, ok := interface{}(m.Hello).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.Hello)
+		}
+		n += 2 + l + sov(uint64(l))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -335,6 +422,50 @@ func (m *TestStruct) UnmarshalVT(dAtA []byte) error {
 			}
 			b := bool(v != 0)
 			m.IsSecure = &b
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = &timestamppb.Timestamp{}
+			}
+			if unmarshal, ok := interface{}(m.CreatedAt).(interface {
+				UnmarshalVT([]byte) error
+			}); ok {
+				if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+					return err
+				}
+			} else {
+				if err := proto.Unmarshal(dAtA[iNdEx:postIndex], m.CreatedAt); err != nil {
+					return err
+				}
+			}
+			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Password", wireType)
@@ -387,6 +518,50 @@ func (m *TestStruct) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			m.TestOneof = &TestStruct_Token{v}
+		case 60:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Hello", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Hello == nil {
+				m.Hello = &testpb.HelloRequest{}
+			}
+			if unmarshal, ok := interface{}(m.Hello).(interface {
+				UnmarshalVT([]byte) error
+			}); ok {
+				if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+					return err
+				}
+			} else {
+				if err := proto.Unmarshal(dAtA[iNdEx:postIndex], m.Hello); err != nil {
+					return err
+				}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
