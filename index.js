@@ -9,7 +9,7 @@ var WireType;
     WireType[WireType["I32"] = 5] = "I32";
 })(WireType || (WireType = {}));
 function EncodeVarint(dst, offset, value) {
-    value = value | 0; // 32-bit integer
+    value = (value | 0) >>> 0; // 32-bit integer
     while (value > 0b01111111) {
         dst[offset++] = (value & 0b01111111) | 0b10000000;
         value >>>= 7;

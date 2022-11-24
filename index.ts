@@ -8,7 +8,7 @@ enum WireType {
 }
 
 function EncodeVarint(dst: Uint8Array, offset: number, value: number): number {
-  value = value | 0; // 32-bit integer
+  value = (value | 0) >>> 0; // 32-bit integer
 
   while (value > 0b01111111) {
     dst[offset++] = (value & 0b01111111) | 0b10000000;
@@ -61,4 +61,3 @@ offset = EncodeValueHeader(buf, offset, 1, WireType.VARINT);
 offset = EncodeVarint(buf, offset, 123);
 
 console.log(DebugHex(buf.subarray(0, offset)));
-
