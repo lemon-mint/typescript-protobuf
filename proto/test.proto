@@ -27,3 +27,8 @@ message TestStruct {
         uint64 token = 7;
     }
 }
+
+
+message TestWire {
+    repeated uint32 ids = 1;
+}
