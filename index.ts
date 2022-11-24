@@ -7,7 +7,7 @@ enum WireType {
   I32 = 5,
 }
 
-function EncodeVarint(dst: Uint8Array, offset: number, value: number): number {
+function EncodeVarint32(dst: Uint8Array, offset: number, value: number): number {
   value = (value | 0) >>> 0; // 32-bit integer
 
   while (value > 127) {
@@ -19,7 +19,7 @@ function EncodeVarint(dst: Uint8Array, offset: number, value: number): number {
   return offset;
 }
 
-function EncodeVarintBigint(
+function EncodeVarint64(
   dst: Uint8Array,
   offset: number,
   value: bigint
@@ -42,7 +42,7 @@ function EncodeValueHeader(
   wireType: WireType
 ): number {
   const tag = (fieldNumber << 3) | Number(wireType);
-  return EncodeVarint(dst, offset, tag);
+  return EncodeVarint32(dst, offset, tag);
 }
 
 function DebugHex(buf: Uint8Array): string {
@@ -56,8 +56,10 @@ function DebugHex(buf: Uint8Array): string {
 const buf = new Uint8Array(1024);
 let offset = 0;
 
-// Encode Message Header
 offset = EncodeValueHeader(buf, offset, 1, WireType.VARINT);
-offset = EncodeVarint(buf, offset, 123);
+offset = EncodeVarint64(buf, offset, -100n);
+
+offset = EncodeValueHeader(buf, offset, 2, WireType.VARINT);
+offset = EncodeVarint32(buf, offset, 123456789);
 
 console.log(DebugHex(buf.subarray(0, offset)));

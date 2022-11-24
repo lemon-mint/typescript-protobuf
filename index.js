@@ -8,7 +8,7 @@ var WireType;
     WireType[WireType["EGROUP"] = 4] = "EGROUP";
     WireType[WireType["I32"] = 5] = "I32";
 })(WireType || (WireType = {}));
-function EncodeVarint(dst, offset, value) {
+function EncodeVarint32(dst, offset, value) {
     value = (value | 0) >>> 0; // 32-bit integer
     while (value > 127) {
         dst[offset++] = (value & 0b01111111) | 0b10000000;
@@ -17,7 +17,7 @@ function EncodeVarint(dst, offset, value) {
     dst[offset++] = value;
     return offset;
 }
-function EncodeVarintBigint(dst, offset, value) {
+function EncodeVarint64(dst, offset, value) {
     value = BigInt.asUintN(64, value);
     while (value > 127n) {
         dst[offset++] = Number(value & 127n) | 0b10000000;
@@ -28,7 +28,7 @@ function EncodeVarintBigint(dst, offset, value) {
 }
 function EncodeValueHeader(dst, offset, fieldNumber, wireType) {
     const tag = (fieldNumber << 3) | Number(wireType);
-    return EncodeVarint(dst, offset, tag);
+    return EncodeVarint32(dst, offset, tag);
 }
 function DebugHex(buf) {
     return Array.from(buf)
@@ -38,8 +38,9 @@ function DebugHex(buf) {
 // Test Enocde Message
 const buf = new Uint8Array(1024);
 let offset = 0;
-// Encode Message Header
 offset = EncodeValueHeader(buf, offset, 1, WireType.VARINT);
-offset = EncodeVarint(buf, offset, 123);
+offset = EncodeVarint64(buf, offset, -100n);
+offset = EncodeValueHeader(buf, offset, 2, WireType.VARINT);
+offset = EncodeVarint32(buf, offset, 123456789);
 console.log(DebugHex(buf.subarray(0, offset)));
 //# sourceMappingURL=index.js.map
