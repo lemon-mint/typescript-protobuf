@@ -10,7 +10,7 @@ enum WireType {
 function EncodeVarint(dst: Uint8Array, offset: number, value: number): number {
   value = (value | 0) >>> 0; // 32-bit integer
 
-  while (value > 0b01111111) {
+  while (value > 127) {
     dst[offset++] = (value & 0b01111111) | 0b10000000;
     value >>>= 7;
   }
