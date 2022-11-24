@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EncodeString = exports.EncodeBytes = exports.EncodeVarint = exports.EncodeValueHeader = exports.WireType = void 0;
+exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.WireType = void 0;
 var WireType;
 (function (WireType) {
     WireType[WireType["VARINT"] = 0] = "VARINT";
@@ -19,6 +19,52 @@ function EncodeVarNumber(dst, offset, value) {
     dst[offset++] = value;
     return offset;
 }
+function DecodeVarNumber(buf, offset) {
+    let value = 0;
+    let shift = 0;
+    while (true) {
+        const byte = buf[offset++];
+        value |= (byte & 0b01111111) << shift;
+        if (byte < 128) {
+            break;
+        }
+        shift += 7;
+    }
+    return [value | 0, offset];
+}
+function DecodeVarBigInt(buf, offset) {
+    let value = 0n;
+    let shift = 0n;
+    while (true) {
+        const byte = buf[offset++];
+        value |= BigInt(byte & 0b01111111) << shift;
+        if (byte < 128) {
+            break;
+        }
+        shift += 7n;
+    }
+    return [BigInt.asIntN(64, value), offset];
+}
+function DecodeVarInt32(buf, offset) {
+    const [v, o] = DecodeVarNumber(buf, offset);
+    return [v, o];
+}
+exports.DecodeVarInt32 = DecodeVarInt32;
+function DecodeVarUint32(buf, offset) {
+    const [v, o] = DecodeVarNumber(buf, offset);
+    return [v >>> 0, o];
+}
+exports.DecodeVarUint32 = DecodeVarUint32;
+function DecodeVarInt64(buf, offset) {
+    const [v, o] = DecodeVarBigInt(buf, offset);
+    return [v, o];
+}
+exports.DecodeVarInt64 = DecodeVarInt64;
+function DecodeVarUint64(buf, offset) {
+    const [v, o] = DecodeVarBigInt(buf, offset);
+    return [BigInt.asUintN(64, v), o];
+}
+exports.DecodeVarUint64 = DecodeVarUint64;
 function EncodeVarBigInt(dst, offset, value) {
     value = BigInt.asUintN(64, value);
     while (value > 127n) {
@@ -33,7 +79,7 @@ function EncodeValueHeader(dst, offset, fieldNumber, wireType) {
     return EncodeVarNumber(dst, offset, tag);
 }
 exports.EncodeValueHeader = EncodeValueHeader;
-function EncodeVarint(dst, offset, fieldNumber, value) {
+function EncodeVarInt(dst, offset, fieldNumber, value) {
     offset = EncodeValueHeader(dst, offset, fieldNumber, WireType.VARINT);
     if (typeof value === "bigint") {
         offset = EncodeVarBigInt(dst, offset, value);
@@ -43,7 +89,7 @@ function EncodeVarint(dst, offset, fieldNumber, value) {
     }
     return offset;
 }
-exports.EncodeVarint = EncodeVarint;
+exports.EncodeVarInt = EncodeVarInt;
 function EncodeBytes(dst, offset, fieldNumber, value) {
     offset = EncodeValueHeader(dst, offset, fieldNumber, WireType.LEN);
     offset = EncodeVarNumber(dst, offset, value.length);
@@ -65,14 +111,14 @@ function DebugHex(buf) {
 // Test Enocde Message
 const buf = new Uint8Array(1024);
 let offset = 0;
-offset = EncodeVarint(buf, offset, 1, 123);
-offset = EncodeVarint(buf, offset, 2, 456n);
+offset = EncodeVarInt(buf, offset, 1, 123);
+offset = EncodeVarInt(buf, offset, 2, 456n);
 offset = EncodeString(buf, offset, 3, "Hello World");
 const submessage = new Uint8Array(1024);
 let suboffset = 0;
-suboffset = EncodeVarint(submessage, suboffset, 1, 789);
-suboffset = EncodeVarint(submessage, suboffset, 2, 101112n);
-suboffset = EncodeString(submessage, suboffset, 3, "Hello Second World");
+suboffset = EncodeVarInt(submessage, suboffset, 1, 789);
+suboffset = EncodeVarInt(submessage, suboffset, 2, 101112n);
+suboffset = EncodeString(submessage, suboffset, 3, "Hello New World");
 offset = EncodeBytes(buf, offset, 4, submessage.subarray(0, suboffset));
 console.log(DebugHex(buf.subarray(0, offset)));
 //# sourceMappingURL=index.js.map
