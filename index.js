@@ -18,7 +18,7 @@ function EncodeVarint(dst, offset, value) {
     return offset;
 }
 function EncodeVarintBigint(dst, offset, value) {
-    value = BigInt.asIntN(64, value);
+    value = BigInt.asUintN(64, value);
     while (value > 127n) {
         dst[offset++] = Number(value & 127n) | 0b10000000;
         value >>= 7n;
