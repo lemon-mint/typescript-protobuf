@@ -1,4 +1,4 @@
-enum WireType {
+export enum WireType {
   VARINT = 0,
   I64 = 1,
   LEN = 2,
@@ -7,7 +7,11 @@ enum WireType {
   I32 = 5,
 }
 
-function EncodeVarint32(dst: Uint8Array, offset: number, value: number): number {
+function EncodeVarNumber(
+  dst: Uint8Array,
+  offset: number,
+  value: number
+): number {
   value = (value | 0) >>> 0; // 32-bit integer
 
   while (value > 127) {
@@ -19,7 +23,7 @@ function EncodeVarint32(dst: Uint8Array, offset: number, value: number): number 
   return offset;
 }
 
-function EncodeVarint64(
+function EncodeVarBigInt(
   dst: Uint8Array,
   offset: number,
   value: bigint
@@ -35,14 +39,67 @@ function EncodeVarint64(
   return offset;
 }
 
-function EncodeValueHeader(
+export function EncodeValueHeader(
   dst: Uint8Array,
   offset: number,
   fieldNumber: number,
   wireType: WireType
 ): number {
   const tag = (fieldNumber << 3) | Number(wireType);
-  return EncodeVarint32(dst, offset, tag);
+  return EncodeVarNumber(dst, offset, tag);
+}
+
+export function EncodeVarint(
+  dst: Uint8Array,
+  offset: number,
+  fieldNumber: number,
+  value: number
+): number;
+
+export function EncodeVarint(
+  dst: Uint8Array,
+  offset: number,
+  fieldNumber: number,
+  value: bigint
+): number;
+
+export function EncodeVarint(
+  dst: Uint8Array,
+  offset: number,
+  fieldNumber: number,
+  value: number | bigint
+): number {
+  offset = EncodeValueHeader(dst, offset, fieldNumber, WireType.VARINT);
+  if (typeof value === "bigint") {
+    offset = EncodeVarBigInt(dst, offset, value);
+  } else {
+    offset = EncodeVarNumber(dst, offset, value);
+  }
+  return offset;
+}
+
+export function EncodeBytes(
+  dst: Uint8Array,
+  offset: number,
+  fieldNumber: number,
+  value: Uint8Array
+): number {
+  offset = EncodeValueHeader(dst, offset, fieldNumber, WireType.LEN);
+  offset = EncodeVarNumber(dst, offset, value.length);
+  dst.set(value, offset);
+  offset += value.length;
+  return offset;
+}
+
+const TE = new TextEncoder();
+
+export function EncodeString(
+  dst: Uint8Array,
+  offset: number,
+  fieldNumber: number,
+  value: string
+): number {
+  return EncodeBytes(dst, offset, fieldNumber, TE.encode(value));
 }
 
 function DebugHex(buf: Uint8Array): string {
@@ -56,10 +113,8 @@ function DebugHex(buf: Uint8Array): string {
 const buf = new Uint8Array(1024);
 let offset = 0;
 
-offset = EncodeValueHeader(buf, offset, 1, WireType.VARINT);
-offset = EncodeVarint64(buf, offset, -100n);
-
-offset = EncodeValueHeader(buf, offset, 2, WireType.VARINT);
-offset = EncodeVarint32(buf, offset, 123456789);
+offset = EncodeVarint(buf, offset, 1, 123);
+offset = EncodeVarint(buf, offset, 2, 456n);
+offset = EncodeString(buf, offset, 3, "Hello World");
 
 console.log(DebugHex(buf.subarray(0, offset)));
