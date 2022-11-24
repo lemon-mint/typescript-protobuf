@@ -26,7 +26,7 @@ function EncodeVarintBigint(
 ): number {
   value = BigInt.asIntN(64, value);
 
-  while (value > 0b01111111n) {
+  while (value > 127n) {
     dst[offset++] = Number(value & 0b01111111n) | 0b10000000;
     value >>= 7n;
   }
