@@ -44,3 +44,21 @@ function EncodeValueHeader(
   const tag = (fieldNumber << 3) | Number(wireType);
   return EncodeVarint(dst, offset, tag);
 }
+
+function DebugHex(buf: Uint8Array): string {
+  return Array.from(buf)
+    .map((x) => x.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// Test Enocde Message
+
+const buf = new Uint8Array(1024);
+let offset = 0;
+
+// Encode Message Header
+offset = EncodeValueHeader(buf, offset, 1, WireType.VARINT);
+offset = EncodeVarint(buf, offset, 123);
+
+console.log(DebugHex(buf.subarray(0, offset)));
+
