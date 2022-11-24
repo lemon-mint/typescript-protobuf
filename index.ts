@@ -117,4 +117,12 @@ offset = EncodeVarint(buf, offset, 1, 123);
 offset = EncodeVarint(buf, offset, 2, 456n);
 offset = EncodeString(buf, offset, 3, "Hello World");
 
+const submessage = new Uint8Array(1024);
+let suboffset = 0;
+suboffset = EncodeVarint(submessage, suboffset, 1, 789);
+suboffset = EncodeVarint(submessage, suboffset, 2, 101112n);
+suboffset = EncodeString(submessage, suboffset, 3, "Hello Second World");
+
+offset = EncodeBytes(buf, offset, 4, submessage.subarray(0, suboffset));
+
 console.log(DebugHex(buf.subarray(0, offset)));
