@@ -6,6 +6,8 @@ export declare enum WireType {
     EGROUP = 4,
     I32 = 5
 }
+export declare function ZigZagEncode(value: number): number;
+export declare function ZigZagEncode(value: bigint): bigint;
 export declare function DecodeVarInt32(buf: Uint8Array, offset: number): [value: number, offset: number];
 export declare function DecodeVarUint32(buf: Uint8Array, offset: number): [value: number, offset: number];
 export declare function DecodeVarInt64(buf: Uint8Array, offset: number): [value: bigint, offset: number];

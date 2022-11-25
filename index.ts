@@ -7,6 +7,24 @@ export enum WireType {
   I32 = 5,
 }
 
+export function ZigZagEncode(value: number): number;
+export function ZigZagEncode(value: bigint): bigint;
+export function ZigZagEncode(value: number | bigint): any {
+  if (typeof value === "bigint") {
+    if (value < 0n) {
+      value = -value;
+      return (value * 2n) - 1n;
+    }
+    return value * 2n
+  }
+
+  if (value < 0) {
+    value = -value;
+    return (value * 2) - 1;
+  }
+  return value * 2
+}
+
 function EncodeVarNumber(
   dst: Uint8Array,
   offset: number,
@@ -172,10 +190,10 @@ export function EncodeI32(
 ): number {
   value = (value | 0) >>> 0;
 
-  dst[offset] = value & 0xFF;
-  dst[offset+1] = (value>>>8) & 0xFF;
-  dst[offset+2] = (value>>>16) & 0xFF;
-  dst[offset+3] = (value>>>24) & 0xFF;
+  dst[offset] = value & 0xff;
+  dst[offset + 1] = (value >>> 8) & 0xff;
+  dst[offset + 2] = (value >>> 16) & 0xff;
+  dst[offset + 3] = (value >>> 24) & 0xff;
   offset += 4;
 
   return offset;
@@ -188,14 +206,14 @@ export function EncodeI64(
 ): number {
   value = BigInt.asUintN(64, value);
 
-  dst[offset] = Number(value & 0xFFn);
-  dst[offset+1] = Number(value>>8n & 0xFFn);
-  dst[offset+2] = Number(value>>16n & 0xFFn);
-  dst[offset+3] = Number(value>>24n & 0xFFn);
-  dst[offset+4] = Number(value>>32n & 0xFFn);
-  dst[offset+5] = Number(value>>40n & 0xFFn);
-  dst[offset+6] = Number(value>>48n & 0xFFn);
-  dst[offset+7] = Number(value>>46n & 0xFFn);
+  dst[offset] = Number(value & 0xffn);
+  dst[offset + 1] = Number((value >> 8n) & 0xffn);
+  dst[offset + 2] = Number((value >> 16n) & 0xffn);
+  dst[offset + 3] = Number((value >> 24n) & 0xffn);
+  dst[offset + 4] = Number((value >> 32n) & 0xffn);
+  dst[offset + 5] = Number((value >> 40n) & 0xffn);
+  dst[offset + 6] = Number((value >> 48n) & 0xffn);
+  dst[offset + 7] = Number((value >> 46n) & 0xffn);
   offset += 8;
 
   return offset;
