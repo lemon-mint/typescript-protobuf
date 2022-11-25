@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.WireType = void 0;
+exports.EncodeI64 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.WireType = void 0;
 var WireType;
 (function (WireType) {
     WireType[WireType["VARINT"] = 0] = "VARINT";
@@ -101,6 +101,30 @@ function EncodeString(dst, offset, value) {
     return EncodeBytes(dst, offset, TE.encode(value));
 }
 exports.EncodeString = EncodeString;
+function EncodeI32(dst, offset, value) {
+    value = (value | 0) >>> 0;
+    dst[offset] = value & 0xFF;
+    dst[offset + 1] = (value >>> 8) & 0xFF;
+    dst[offset + 2] = (value >>> 16) & 0xFF;
+    dst[offset + 3] = (value >>> 24) & 0xFF;
+    offset += 4;
+    return offset;
+}
+exports.EncodeI32 = EncodeI32;
+function EncodeI64(dst, offset, value) {
+    value = BigInt.asUintN(64, value);
+    dst[offset] = Number(value & 0xffn);
+    dst[offset + 1] = Number(value >> 8n & 0xffn);
+    dst[offset + 2] = Number(value >> 16n & 0xffn);
+    dst[offset + 3] = Number(value >> 24n & 0xffn);
+    dst[offset + 4] = Number(value >> 32n & 0xffn);
+    dst[offset + 5] = Number(value >> 40n & 0xffn);
+    dst[offset + 6] = Number(value >> 48n & 0xffn);
+    dst[offset + 7] = Number(value >> 46n & 0xffn);
+    offset += 8;
+    return offset;
+}
+exports.EncodeI64 = EncodeI64;
 function DebugHex(buf) {
     return Array.from(buf)
         .map((x) => x.toString(16).padStart(2, "0"))
@@ -152,5 +176,10 @@ packedoffset = EncodeVarInt(packed, packedoffset, 3);
 packedoffset = EncodeVarInt(packed, packedoffset, 270);
 packedoffset = EncodeVarInt(packed, packedoffset, 86942);
 offset = EncodeBytes(buf, offset, packed.subarray(0, packedoffset));
+// I32, I64
+offset = EncodeValueHeader(buf, offset, 8, WireType.I32);
+offset = EncodeI32(buf, offset, 888);
+offset = EncodeValueHeader(buf, offset, 9, WireType.I64);
+offset = EncodeI64(buf, offset, 999n);
 console.log(DebugHex(buf.subarray(0, offset)));
 //# sourceMappingURL=index.js.map
