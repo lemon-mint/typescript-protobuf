@@ -175,6 +175,10 @@ export function EncodeVarInt(
   if (typeof value === "bigint") {
     offset = EncodeVarBigInt(dst, offset, value);
   } else {
+    if (value < 0) {
+      // NOTE: Protocol Buffers signed varint encoding uses two's complement of 64-bit unsigned integers.
+      offset = EncodeVarBigInt(dst, offset, BigInt(value));
+    }
     offset = EncodeVarNumber(dst, offset, value);
   }
   return offset;
@@ -265,7 +269,7 @@ export function DecodeI64(
     (BigInt(buf[offset + 6]) << 48n) |
     (BigInt(buf[offset + 7]) << 56n);
   offset += 8;
-  
+
   return [BigInt.asIntN(64, value), offset];
 }
 
