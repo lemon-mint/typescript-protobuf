@@ -79,8 +79,7 @@ function EncodeValueHeader(dst, offset, fieldNumber, wireType) {
     return EncodeVarNumber(dst, offset, tag);
 }
 exports.EncodeValueHeader = EncodeValueHeader;
-function EncodeVarInt(dst, offset, fieldNumber, value) {
-    offset = EncodeValueHeader(dst, offset, fieldNumber, WireType.VARINT);
+function EncodeVarInt(dst, offset, value) {
     if (typeof value === "bigint") {
         offset = EncodeVarBigInt(dst, offset, value);
     }
@@ -90,8 +89,7 @@ function EncodeVarInt(dst, offset, fieldNumber, value) {
     return offset;
 }
 exports.EncodeVarInt = EncodeVarInt;
-function EncodeBytes(dst, offset, fieldNumber, value) {
-    offset = EncodeValueHeader(dst, offset, fieldNumber, WireType.LEN);
+function EncodeBytes(dst, offset, value) {
     offset = EncodeVarNumber(dst, offset, value.length);
     dst.set(value, offset);
     offset += value.length;
@@ -99,8 +97,8 @@ function EncodeBytes(dst, offset, fieldNumber, value) {
 }
 exports.EncodeBytes = EncodeBytes;
 const TE = new TextEncoder();
-function EncodeString(dst, offset, fieldNumber, value) {
-    return EncodeBytes(dst, offset, fieldNumber, TE.encode(value));
+function EncodeString(dst, offset, value) {
+    return EncodeBytes(dst, offset, TE.encode(value));
 }
 exports.EncodeString = EncodeString;
 function DebugHex(buf) {
@@ -111,14 +109,27 @@ function DebugHex(buf) {
 // Test Enocde Message
 const buf = new Uint8Array(1024);
 let offset = 0;
-offset = EncodeVarInt(buf, offset, 1, 123);
-offset = EncodeVarInt(buf, offset, 2, 456n);
-offset = EncodeString(buf, offset, 3, "Hello World");
+offset = EncodeValueHeader(buf, offset, 1, WireType.VARINT);
+offset = EncodeVarInt(buf, offset, 123);
+offset = EncodeValueHeader(buf, offset, 2, WireType.VARINT);
+offset = EncodeVarInt(buf, offset, 456n);
+offset = EncodeValueHeader(buf, offset, 3, WireType.LEN);
+offset = EncodeString(buf, offset, "Hello World");
+// submessage
 const submessage = new Uint8Array(1024);
 let suboffset = 0;
-suboffset = EncodeVarInt(submessage, suboffset, 1, 789);
-suboffset = EncodeVarInt(submessage, suboffset, 2, 101112n);
-suboffset = EncodeString(submessage, suboffset, 3, "Hello New World");
-offset = EncodeBytes(buf, offset, 4, submessage.subarray(0, suboffset));
+suboffset = EncodeValueHeader(submessage, suboffset, 1, WireType.VARINT);
+suboffset = EncodeVarInt(submessage, suboffset, 789);
+suboffset = EncodeValueHeader(submessage, suboffset, 2, WireType.VARINT);
+suboffset = EncodeVarInt(submessage, suboffset, 101112n);
+suboffset = EncodeValueHeader(submessage, suboffset, 3, WireType.LEN);
+suboffset = EncodeString(submessage, suboffset, "Hello New World");
+offset = EncodeValueHeader(buf, offset, 4, WireType.LEN);
+offset = EncodeBytes(buf, offset, submessage.subarray(0, suboffset));
+// repeated
+for (let index = 0; index < 4; index++) {
+    offset = EncodeValueHeader(buf, offset, 5, WireType.VARINT);
+    offset = EncodeVarInt(buf, offset, (index + 1) * 1000);
+}
 console.log(DebugHex(buf.subarray(0, offset)));
 //# sourceMappingURL=index.js.map

@@ -11,8 +11,8 @@ export declare function DecodeVarUint32(buf: Uint8Array, offset: number): [value
 export declare function DecodeVarInt64(buf: Uint8Array, offset: number): [value: bigint, offset: number];
 export declare function DecodeVarUint64(buf: Uint8Array, offset: number): [value: bigint, offset: number];
 export declare function EncodeValueHeader(dst: Uint8Array, offset: number, fieldNumber: number, wireType: WireType): number;
-export declare function EncodeVarInt(dst: Uint8Array, offset: number, fieldNumber: number, value: number): number;
-export declare function EncodeVarInt(dst: Uint8Array, offset: number, fieldNumber: number, value: bigint): number;
-export declare function EncodeBytes(dst: Uint8Array, offset: number, fieldNumber: number, value: Uint8Array): number;
-export declare function EncodeString(dst: Uint8Array, offset: number, fieldNumber: number, value: string): number;
+export declare function EncodeVarInt(dst: Uint8Array, offset: number, value: number): number;
+export declare function EncodeVarInt(dst: Uint8Array, offset: number, value: bigint): number;
+export declare function EncodeBytes(dst: Uint8Array, offset: number, value: Uint8Array): number;
+export declare function EncodeString(dst: Uint8Array, offset: number, value: string): number;
 //# sourceMappingURL=index.d.ts.map
