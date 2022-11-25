@@ -131,5 +131,18 @@ for (let index = 0; index < 4; index++) {
     offset = EncodeValueHeader(buf, offset, 5, WireType.VARINT);
     offset = EncodeVarInt(buf, offset, (index + 1) * 1000);
 }
+// Maps
+for (let index = 0; index < 4; index++) {
+    const gEntry = new Uint8Array(512);
+    let gOffset = 0;
+    //key_<index>
+    gOffset = EncodeValueHeader(gEntry, gOffset, 1, WireType.LEN);
+    gOffset = EncodeString(gEntry, gOffset, `key_${index}`);
+    //val_<index>
+    gOffset = EncodeValueHeader(gEntry, gOffset, 2, WireType.LEN);
+    gOffset = EncodeString(gEntry, gOffset, `val_${index}`);
+    offset = EncodeValueHeader(buf, offset, 6, WireType.LEN);
+    offset = EncodeBytes(buf, offset, gEntry.subarray(0, gOffset));
+}
 console.log(DebugHex(buf.subarray(0, offset)));
 //# sourceMappingURL=index.js.map
