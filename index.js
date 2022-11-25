@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DecodeI64 = exports.EncodeI64 = exports.DecodeI32 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.ZigZagDecode = exports.ZigZagEncode = exports.WireType = void 0;
+exports.DecodeValueHeader = exports.DecodeI64 = exports.EncodeI64 = exports.DecodeI32 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.ZigZagDecode = exports.ZigZagEncode = exports.WireType = void 0;
 var WireType;
 (function (WireType) {
     WireType[WireType["VARINT"] = 0] = "VARINT";
@@ -177,6 +177,13 @@ function DecodeI64(buf, offset) {
     return [BigInt.asIntN(64, value), offset];
 }
 exports.DecodeI64 = DecodeI64;
+function DecodeValueHeader(buf, offset) {
+    const [tag, o] = DecodeVarNumber(buf, offset);
+    const fieldNumber = tag >>> 3;
+    const wireType = tag & 0b111;
+    return [fieldNumber, wireType, o];
+}
+exports.DecodeValueHeader = DecodeValueHeader;
 function DebugHex(buf) {
     return Array.from(buf)
         .map((x) => x.toString(16).padStart(2, "0"))
@@ -234,12 +241,33 @@ offset = EncodeI32(buf, offset, 888);
 offset = EncodeValueHeader(buf, offset, 9, WireType.I64);
 offset = EncodeI64(buf, offset, 999n);
 console.log(DebugHex(buf.subarray(0, offset)));
-// for (let i = -100000; i < 100000; i++) {
-//   offset = 0;
-//   offset = EncodeI64(buf, offset, BigInt(i));
-//   const [value, _] = DecodeI64(buf, 0);
-//   if (value !== BigInt(i)) {
-//     throw new Error(`i64 encode/decode failed: ${i} != ${value}`);
-//   }
-// }
+/*
+
+for (let i = 0; i < 100000; i++) {
+  offset = 0;
+  offset = EncodeValueHeader(buf, offset, i, WireType.VARINT);
+  offset = EncodeVarInt(buf, offset, BigInt(i));
+
+  // Decode
+  let [fieldNumber, wireType, o] = DecodeValueHeader(buf, 0);
+  let [value, oo] = DecodeVarInt64(buf, o);
+
+  if (fieldNumber !== i) {
+    throw new Error(`fieldNumber ${fieldNumber} !== ${i}`);
+  }
+
+  if (wireType !== WireType.VARINT) {
+    throw new Error(`wireType ${wireType} !== ${WireType.VARINT}`);
+  }
+
+  if (value !== BigInt(i)) {
+    throw new Error(`value ${value} !== ${i}`);
+  }
+
+  if (value !== BigInt(i)) {
+    throw new Error(`value ${value} !== ${i}`);
+  }
+}
+
+*/
 //# sourceMappingURL=index.js.map
