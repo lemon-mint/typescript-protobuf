@@ -231,7 +231,7 @@ export function EncodeI64(
   dst[offset + 4] = Number((value >> 32n) & 0xffn);
   dst[offset + 5] = Number((value >> 40n) & 0xffn);
   dst[offset + 6] = Number((value >> 48n) & 0xffn);
-  dst[offset + 7] = Number((value >> 46n) & 0xffn);
+  dst[offset + 7] = Number((value >> 56n) & 0xffn);
   offset += 8;
 
   return offset;
