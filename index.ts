@@ -25,6 +25,24 @@ export function ZigZagEncode(value: number | bigint): any {
   return value * 2
 }
 
+export function ZigZagDecode(value: number): number;
+export function ZigZagDecode(value: bigint): bigint;
+export function ZigZagDecode(value: number | bigint): any {
+  if (typeof value === "bigint") {
+    value = BigInt.asUintN(64, value);
+    if (value & 1n) {
+      return -(value + 1n) / 2n;
+    }
+    return value / 2n;
+  }
+
+  value = value >>> 0;
+  if (value & 1) {
+    return -(value + 1) / 2;
+  }
+  return value / 2;
+}
+
 function EncodeVarNumber(
   dst: Uint8Array,
   offset: number,

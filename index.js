@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EncodeI64 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.ZigZagEncode = exports.WireType = void 0;
+exports.EncodeI64 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.ZigZagDecode = exports.ZigZagEncode = exports.WireType = void 0;
 var WireType;
 (function (WireType) {
     WireType[WireType["VARINT"] = 0] = "VARINT";
@@ -25,6 +25,21 @@ function ZigZagEncode(value) {
     return value * 2;
 }
 exports.ZigZagEncode = ZigZagEncode;
+function ZigZagDecode(value) {
+    if (typeof value === "bigint") {
+        value = BigInt.asUintN(64, value);
+        if (value & 1n) {
+            return -(value + 1n) / 2n;
+        }
+        return value / 2n;
+    }
+    value = value >>> 0;
+    if (value & 1) {
+        return -(value + 1) / 2;
+    }
+    return value / 2;
+}
+exports.ZigZagDecode = ZigZagDecode;
 function EncodeVarNumber(dst, offset, value) {
     value = (value | 0) >>> 0; // 32-bit integer
     while (value > 127) {
