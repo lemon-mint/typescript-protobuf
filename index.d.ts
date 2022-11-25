@@ -20,5 +20,7 @@ export declare function EncodeVarInt(dst: Uint8Array, offset: number, value: big
 export declare function EncodeBytes(dst: Uint8Array, offset: number, value: Uint8Array): number;
 export declare function EncodeString(dst: Uint8Array, offset: number, value: string): number;
 export declare function EncodeI32(dst: Uint8Array, offset: number, value: number): number;
+export declare function DecodeI32(buf: Uint8Array, offset: number): [value: number, offset: number];
 export declare function EncodeI64(dst: Uint8Array, offset: number, value: bigint): number;
+export declare function DecodeI64(buf: Uint8Array, offset: number): [value: bigint, offset: number];
 //# sourceMappingURL=index.d.ts.map

@@ -13,16 +13,16 @@ export function ZigZagEncode(value: number | bigint): any {
   if (typeof value === "bigint") {
     if (value < 0n) {
       value = -value;
-      return (value * 2n) - 1n;
+      return value * 2n - 1n;
     }
-    return value * 2n
+    return value * 2n;
   }
 
   if (value < 0) {
     value = -value;
-    return (value * 2) - 1;
+    return value * 2 - 1;
   }
-  return value * 2
+  return value * 2;
 }
 
 export function ZigZagDecode(value: number): number;
@@ -217,6 +217,20 @@ export function EncodeI32(
   return offset;
 }
 
+export function DecodeI32(
+  buf: Uint8Array,
+  offset: number
+): [value: number, offset: number] {
+  const value =
+    (buf[offset] << 0) |
+    (buf[offset + 1] << 8) |
+    (buf[offset + 2] << 16) |
+    (buf[offset + 3] << 24);
+  offset += 4;
+
+  return [value, offset];
+}
+
 export function EncodeI64(
   dst: Uint8Array,
   offset: number,
@@ -235,6 +249,24 @@ export function EncodeI64(
   offset += 8;
 
   return offset;
+}
+
+export function DecodeI64(
+  buf: Uint8Array,
+  offset: number
+): [value: bigint, offset: number] {
+  const value =
+    (BigInt(buf[offset]) << 0n) |
+    (BigInt(buf[offset + 1]) << 8n) |
+    (BigInt(buf[offset + 2]) << 16n) |
+    (BigInt(buf[offset + 3]) << 24n) |
+    (BigInt(buf[offset + 4]) << 32n) |
+    (BigInt(buf[offset + 5]) << 40n) |
+    (BigInt(buf[offset + 6]) << 48n) |
+    (BigInt(buf[offset + 7]) << 56n);
+  offset += 8;
+  
+  return [BigInt.asIntN(64, value), offset];
 }
 
 function DebugHex(buf: Uint8Array): string {
@@ -307,3 +339,12 @@ offset = EncodeValueHeader(buf, offset, 9, WireType.I64);
 offset = EncodeI64(buf, offset, 999n);
 
 console.log(DebugHex(buf.subarray(0, offset)));
+
+// for (let i = -100000; i < 100000; i++) {
+//   offset = 0;
+//   offset = EncodeI64(buf, offset, BigInt(i));
+//   const [value, _] = DecodeI64(buf, 0);
+//   if (value !== BigInt(i)) {
+//     throw new Error(`i64 encode/decode failed: ${i} != ${value}`);
+//   }
+// }

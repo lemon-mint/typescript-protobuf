@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EncodeI64 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.ZigZagDecode = exports.ZigZagEncode = exports.WireType = void 0;
+exports.DecodeI64 = exports.EncodeI64 = exports.DecodeI32 = exports.EncodeI32 = exports.EncodeString = exports.EncodeBytes = exports.EncodeVarInt = exports.EncodeValueHeader = exports.DecodeVarUint64 = exports.DecodeVarInt64 = exports.DecodeVarUint32 = exports.DecodeVarInt32 = exports.ZigZagDecode = exports.ZigZagEncode = exports.WireType = void 0;
 var WireType;
 (function (WireType) {
     WireType[WireType["VARINT"] = 0] = "VARINT";
@@ -14,13 +14,13 @@ function ZigZagEncode(value) {
     if (typeof value === "bigint") {
         if (value < 0n) {
             value = -value;
-            return (value * 2n) - 1n;
+            return value * 2n - 1n;
         }
         return value * 2n;
     }
     if (value < 0) {
         value = -value;
-        return (value * 2) - 1;
+        return value * 2 - 1;
     }
     return value * 2;
 }
@@ -141,6 +141,15 @@ function EncodeI32(dst, offset, value) {
     return offset;
 }
 exports.EncodeI32 = EncodeI32;
+function DecodeI32(buf, offset) {
+    const value = (buf[offset] << 0) |
+        (buf[offset + 1] << 8) |
+        (buf[offset + 2] << 16) |
+        (buf[offset + 3] << 24);
+    offset += 4;
+    return [value, offset];
+}
+exports.DecodeI32 = DecodeI32;
 function EncodeI64(dst, offset, value) {
     value = BigInt.asUintN(64, value);
     dst[offset] = Number(value & 0xffn);
@@ -150,11 +159,24 @@ function EncodeI64(dst, offset, value) {
     dst[offset + 4] = Number((value >> 32n) & 0xffn);
     dst[offset + 5] = Number((value >> 40n) & 0xffn);
     dst[offset + 6] = Number((value >> 48n) & 0xffn);
-    dst[offset + 7] = Number((value >> 46n) & 0xffn);
+    dst[offset + 7] = Number((value >> 56n) & 0xffn);
     offset += 8;
     return offset;
 }
 exports.EncodeI64 = EncodeI64;
+function DecodeI64(buf, offset) {
+    const value = (BigInt(buf[offset]) << 0n) |
+        (BigInt(buf[offset + 1]) << 8n) |
+        (BigInt(buf[offset + 2]) << 16n) |
+        (BigInt(buf[offset + 3]) << 24n) |
+        (BigInt(buf[offset + 4]) << 32n) |
+        (BigInt(buf[offset + 5]) << 40n) |
+        (BigInt(buf[offset + 6]) << 48n) |
+        (BigInt(buf[offset + 7]) << 56n);
+    offset += 8;
+    return [BigInt.asIntN(64, value), offset];
+}
+exports.DecodeI64 = DecodeI64;
 function DebugHex(buf) {
     return Array.from(buf)
         .map((x) => x.toString(16).padStart(2, "0"))
@@ -212,4 +234,12 @@ offset = EncodeI32(buf, offset, 888);
 offset = EncodeValueHeader(buf, offset, 9, WireType.I64);
 offset = EncodeI64(buf, offset, 999n);
 console.log(DebugHex(buf.subarray(0, offset)));
+// for (let i = -100000; i < 100000; i++) {
+//   offset = 0;
+//   offset = EncodeI64(buf, offset, BigInt(i));
+//   const [value, _] = DecodeI64(buf, 0);
+//   if (value !== BigInt(i)) {
+//     throw new Error(`i64 encode/decode failed: ${i} != ${value}`);
+//   }
+// }
 //# sourceMappingURL=index.js.map
