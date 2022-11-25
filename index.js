@@ -132,7 +132,7 @@ for (let index = 0; index < 4; index++) {
     offset = EncodeVarInt(buf, offset, (index + 1) * 1000);
 }
 // Maps
-for (let index = 0; index < 4; index++) {
+for (let index = 0; index < 2; index++) {
     const gEntry = new Uint8Array(512);
     let gOffset = 0;
     //key_<index>
@@ -144,5 +144,13 @@ for (let index = 0; index < 4; index++) {
     offset = EncodeValueHeader(buf, offset, 6, WireType.LEN);
     offset = EncodeBytes(buf, offset, gEntry.subarray(0, gOffset));
 }
+// packed
+offset = EncodeValueHeader(buf, offset, 7, WireType.LEN);
+const packed = new Uint8Array(1024);
+let packedoffset = 0;
+packedoffset = EncodeVarInt(packed, packedoffset, 3);
+packedoffset = EncodeVarInt(packed, packedoffset, 270);
+packedoffset = EncodeVarInt(packed, packedoffset, 86942);
+offset = EncodeBytes(buf, offset, packed.subarray(0, packedoffset));
 console.log(DebugHex(buf.subarray(0, offset)));
 //# sourceMappingURL=index.js.map

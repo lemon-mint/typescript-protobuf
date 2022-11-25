@@ -199,11 +199,11 @@ offset = EncodeBytes(buf, offset, submessage.subarray(0, suboffset));
 // repeated
 for (let index = 0; index < 4; index++) {
   offset = EncodeValueHeader(buf, offset, 5, WireType.VARINT);
-  offset = EncodeVarInt(buf, offset, (index+1)*1000);
+  offset = EncodeVarInt(buf, offset, (index + 1) * 1000);
 }
 
 // Maps
-for (let index = 0; index < 4; index++) {
+for (let index = 0; index < 2; index++) {
   const gEntry = new Uint8Array(512);
   let gOffset = 0;
 
@@ -218,5 +218,14 @@ for (let index = 0; index < 4; index++) {
   offset = EncodeValueHeader(buf, offset, 6, WireType.LEN);
   offset = EncodeBytes(buf, offset, gEntry.subarray(0, gOffset));
 }
+
+// packed
+offset = EncodeValueHeader(buf, offset, 7, WireType.LEN);
+const packed = new Uint8Array(1024);
+let packedoffset = 0;
+packedoffset = EncodeVarInt(packed, packedoffset, 3);
+packedoffset = EncodeVarInt(packed, packedoffset, 270);
+packedoffset = EncodeVarInt(packed, packedoffset, 86942);
+offset = EncodeBytes(buf, offset, packed.subarray(0, packedoffset));
 
 console.log(DebugHex(buf.subarray(0, offset)));
